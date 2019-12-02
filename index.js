@@ -10,7 +10,7 @@ server.post('/api/users', (req, res) => {
     // get the data the client sent
     const userData = req.body;
 
-    if (userData.hasOwnProperty('name') && userData.hasOwnProperty('bio')) {
+    if (userData.hasOwnProperty('name') || userData.hasOwnProperty('bio')) {
         db.insert(userData)
             .then(user => {
                 res.status(201).json(user);
@@ -71,6 +71,32 @@ server.delete('/api/users/:id', (req, res) => {
             res.status(500).json({ error: "The user information could not be retrieved." });
         })
 })
+
+// PUT requests
+
+server.put('/api/users/:id', (req, res) => {
+    const id = req.params.id;
+    const userData = req.body;
+
+    db.findById(id)
+        .then(user => {
+            if (!user) {
+                res.status(404).json({ message: "The user with the specified ID does not exist." }); // 1.
+            }
+        });
+
+    if (userData.hasOwnProperty('name') || userData.hasOwnProperty('bio')) { // 2.
+        db.update(id, userData)
+            .then(user => {
+                res.status(200).json(user);
+            })
+            .catch(err => {
+                res.status(500).json({ error: "The user information could not be modified." }); // 3.
+            })
+    } else {
+        res.status(400).json({ errorMessage: "Please provide name and bio for the user." });
+    }
+});
 
 // get from the root
 server.get('/', (req, res) => {
