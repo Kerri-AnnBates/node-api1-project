@@ -31,10 +31,28 @@ server.get('/api/users', (req, res) => {
             res.status(200).json(data);
         })
         .catch(err => {
-            console.log("Unable to get data", err);
+            res.end(); // ?
             res.status(500).json({ message: "The user with the specified ID does not exist." });
         })
 });
+
+// GET by id.
+server.get('/api/users/:id', (req, res) => {
+    // Get the id to GET
+    const id = req.params.id;
+    db.findById(id)
+        .then(user => {
+            if(user) {
+                res.status(200).json(user);
+            } else {
+                res.status(404).json({ message: "The user with the specified ID does not exist." });
+            }
+        })
+        .catch(err => {
+            res.end();
+            res.status(500).json({ error: "The user information could not be retrieved." });
+        })
+})
 
 // get from the root
 server.get('/', (req, res) => {
